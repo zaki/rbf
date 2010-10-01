@@ -1,13 +1,13 @@
 class Rbfc
   attr_reader :buffer
   attr_reader :ptr
+  attr_accessor :code
 
   def initialize()
     @buffer = [0]
 	@ptr    = 0
 	@code   = ''
 	@cptr   = 0
-    @loop_s = -1
     @synt   = {
                 '>'=>:op_ptr_plus, '<'=>:op_ptr_minus,
                 '+'=>:op_cell_plus, '-'=>:op_cell_minus,
@@ -55,18 +55,25 @@ class Rbfc
   end
   
   def op_loop_start # [
-    if @buffer[@ptr] != 0
-      @loop_s = @cptr
-    else
-      idx = @code.index(']', @cptr)
-      raise "Syntax error, no matching ]" if idx.nil?
-      @cptr = idx
-      @loop_s = -1
+    if @buffer[@ptr] == 0
+      @cptr = find_matching_bracket(@cptr)
     end
   end
 
   def op_loop_end # ]
-    raise "Syntax error, ] without starting [" if @loop_s == -1
-    @cptr = @loop_s-1
+    @cptr = find_matching_bracket(@cptr)-1
+  end
+
+  def find_matching_bracket(start)
+    dir, push, pop = @code[start].chr == '[' ? [1, '[', ']'] : [-1, ']', '[']
+    lptr, stack  = start, ['x']
+    while (stack.length > 0)
+      lptr+=dir
+      raise "] without matching [" if lptr < 0
+      raise "[ without matching ]" if lptr > @code.length
+      stack.push('x') if @code[lptr].chr == push
+      stack.pop if @code[lptr].chr == pop
+    end
+    lptr
   end
 end

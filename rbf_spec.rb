@@ -36,4 +36,28 @@ describe "RBC" do
     $stdout.string.should == "Hello World!\n"
   end
 
+  it "should ignore comments" do
+    oldstdout, $stdout = $stdout, StringIO.new
+    @rbfc.run('++++++++++Hello world with
+               added comments
+               enjoy # # [>+++++++>+++++++"+++>+++>+<<<<-]>++.>
+               +.+++++++..+++.>++.<<+++++++++++++++.>.+++.------.--------.>+.>.')
+    $stdout.string.should == "Hello World!\n"
+  end
+
+  it "should match brackets" do
+    #             012345678
+    @rbfc.code = '[  [ ]  ]'
+    @rbfc.find_matching_bracket(0).should == 8
+    @rbfc.find_matching_bracket(3).should == 5
+    @rbfc.find_matching_bracket(8).should == 0
+    @rbfc.find_matching_bracket(5).should == 3
+  end
+
+  it "shoud interpret nested loops" do
+    @rbfc.run('+++>+++<[>[>+++<-]+++<-]>>')
+    @rbfc.buffer[@rbfc.ptr].should == 27
+  end
+
+
 end
