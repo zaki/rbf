@@ -50,7 +50,7 @@ class Rbfc
     print @buffer[@ptr].chr
   end
   
-  def op_gets # ,
+  def op_getc # ,
     @buffer[@ptr] = getc
   end
   
